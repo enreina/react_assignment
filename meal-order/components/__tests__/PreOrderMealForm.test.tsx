@@ -22,21 +22,27 @@ const anotherMockDish: Dish = {
   availableMeals: ['lunch', 'dinner'],
 };
 
-const mockFetch = jest.fn((url: string) => {
-  let result = {};
-  if (url.match(/\/api\/dishes/)) {
-    result = { dishes: [mockDish, anotherMockDish] };
-  } else if (url.match(/\/api\/restaurants/)) {
-    result = { restaurants: ['Mc Donalds', 'Olive Garden'] };
-  }
-  return Promise.resolve({
-    json: () => Promise.resolve(result),
-  });
-}) as jest.Mock;
-
-global.fetch = mockFetch;
-
 describe('PreOrderMealForm', () => {
+  const originalFetch = global.fetch;
+  beforeAll(() => {
+    const mockFetch = jest.fn((url: string) => {
+      let result = {};
+      if (url.match(/\/api\/dishes/)) {
+        result = { dishes: [mockDish, anotherMockDish] };
+      } else if (url.match(/\/api\/restaurants/)) {
+        result = { restaurants: ['Mc Donalds', 'Olive Garden'] };
+      }
+      return Promise.resolve({
+        json: () => Promise.resolve(result),
+      });
+    }) as jest.Mock;
+
+    global.fetch = mockFetch;
+  });
+
+  afterAll(() => {
+    global.fetch = originalFetch;
+  });
   describe('Step 1', () => {
     it('renders PreOrderMealForm component and next button should be disabled', () => {
       render(<PreOrderMealForm />);
